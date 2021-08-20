@@ -3,27 +3,36 @@ package com.kuhnen.service;
 import com.azure.messaging.servicebus.*;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class SenderMessageService extends DefaultService {
 
+    @PostConstruct
+    public void startQueue() {
+        startServiceBusQueue(this.getClass().getSimpleName());
+    }
+
+    @PreDestroy
+    public void finalizeQueue() {
+        finalizeClient();
+    }
 
     public void sendMessage() {
 
         // create a Service Bus Sender client for the queue
         ServiceBusSenderClient senderClient = new ServiceBusClientBuilder()
-                .connectionString(connectionString)
+                .connectionString(serviceBusConfiguration.getConnectionString())
                 .sender()
-                .queueName(queueName)
+                .queueName(QUEUE_NAME)
                 .buildClient();
 
         // send one message to the queue
         senderClient.sendMessage(new ServiceBusMessage("Hello, World!"));
-        System.out.println("Sent a single message to the queue: " + queueName);
+        System.out.println("Sent a single message to the queue: " + QUEUE_NAME);
     }
 
     public List<ServiceBusMessage> createMessages() {
@@ -39,9 +48,9 @@ public class SenderMessageService extends DefaultService {
     public void sendMessageBatch() {
         // create a Service Bus Sender client for the queue
         ServiceBusSenderClient senderClient = new ServiceBusClientBuilder()
-                .connectionString(connectionString)
+                .connectionString(serviceBusConfiguration.getConnectionString())
                 .sender()
-                .queueName(queueName)
+                .queueName(QUEUE_NAME)
                 .buildClient();
 
         // Creates an ServiceBusMessageBatch where the ServiceBus.
@@ -60,7 +69,7 @@ public class SenderMessageService extends DefaultService {
 
             // The batch is full, so we create a new batch and send the batch.
             senderClient.sendMessages(messageBatch);
-            System.out.println("Sent a batch of messages to the queue: " + queueName);
+            System.out.println("Sent a batch of messages to the queue: " + QUEUE_NAME);
 
             // create a new batch
             messageBatch = senderClient.createMessageBatch();
@@ -73,7 +82,7 @@ public class SenderMessageService extends DefaultService {
 
         if (messageBatch.getCount() > 0) {
             senderClient.sendMessages(messageBatch);
-            System.out.println("Sent a batch of messages to the queue: " + queueName);
+            System.out.println("Sent a batch of messages to the queue: " + QUEUE_NAME);
         }
 
         //close the client
@@ -81,5 +90,8 @@ public class SenderMessageService extends DefaultService {
     }
 
 
-
+    public String sendMessage(String message) {
+        postMessage(message);
+        return "Deu boa muleke";
+    }
 }

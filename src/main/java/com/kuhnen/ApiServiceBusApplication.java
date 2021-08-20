@@ -23,8 +23,8 @@ public class ApiServiceBusApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        senderMessageService.sendMessage();
-        senderMessageService.sendMessageBatch();
-        receiveMessageService.receiveMessages();
+//        senderMessageService.sendMessage();
+//        senderMessageService.sendMessageBatch();
+//        receiveMessageService.receiveMessages();
     }
 }
